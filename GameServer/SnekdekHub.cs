@@ -5,6 +5,8 @@ namespace snekdek.GameServer
 {
     public class SnekdekHub : Hub
     {
+        public Game _game = new Game();
+
         public async Task SendMessage(string user, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", user, message);

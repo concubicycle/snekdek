@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace snekdek.GameServer
 {
-    public class SnekdekHub : Hub 
+    public class SnekdekHub : Hub
     {
         public async Task SendMessage(string user, string message)
         {

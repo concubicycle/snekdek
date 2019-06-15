@@ -4,7 +4,10 @@ var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const OutputDir = path.resolve(__dirname, 'wwwroot');
 
+const Mode = 'development'
+
 module.exports = {
+  mode: Mode,
   entry: './src/index.js',
   devtool: 'eval-source-map',
   output: {
@@ -18,11 +21,8 @@ module.exports = {
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
-            options: {
-              // you can specify a publicPath here
-              // by default it uses publicPath in webpackOptions.output
-              publicPath: '../',
-              hmr: process.env.NODE_ENV === 'development',
+            options: {              
+              hmr: process.env.NODE_ENV === Mode,
             },
           },
           'css-loader',
@@ -34,7 +34,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            plugins: ['@babel/plugin-proposal-class-properties'],
+            plugins: ['@babel/plugin-proposal-class-properties', 'syntax-async-functions'],
             presets: ['@babel/preset-env']
           }
         }

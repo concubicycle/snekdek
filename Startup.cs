@@ -27,16 +27,6 @@ namespace snekdek
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //context.Response.WriteAsync("Hello World!");
-            // app.Run(async (context) =>
-            // {
-            //     using (var reader = File.OpenText("index.html"))
-            //     {
-            //         var str = await reader.ReadToEndAsync();
-            //         await context.Response.WriteAsync(str);                    
-            //     }
-            // });
         }
     }
 }

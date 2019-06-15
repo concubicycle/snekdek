@@ -1,18 +1,22 @@
-import { utils, Sprite, Loader } from 'pixi.js';
+import SpritePool from './SpritePool'
 
 const GRID_WIDTH = 50;
 const GRID_HEIGHT = 50;
 
 
-export default class Grid {
+export default class Grid {   
+
     constructor(app, spriteFactory) {
-        this.spriteFactory = spriteFactory;
-        this.app = app;
+        this.app = app;        
+        this.spritePool = new SpritePool(spriteFactory);
     }
 
+    usedSprites = [];
 
 
     redraw(players, localPlayer) {
+        this.spritePool.returnAll();
+
         const centerCoord = localPlayer.head.coords;
 
         const screenWidth = window.innerWidth;
@@ -24,8 +28,8 @@ export default class Grid {
         
         // the screen spans in terms of block size
         // @TODO: Edge case for even/odd sizes?
-        let xSpan = Math.floor(screenWidth / blockSize + 2 * blockSize);
-        let ySpan = Math.floor(screenHeight / blockSize + 2 * blockSize);
+        let xSpan = Math.floor(screenWidth / blockSize);
+        let ySpan = Math.floor(screenHeight / blockSize);
 
         if(this.isEven(xSpan)) xSpan++;
         if(this.isEven(ySpan)) ySpan++;
@@ -46,24 +50,27 @@ export default class Grid {
             return {x, y};
         }
 
-        for (let x = minX ; x < maxX; x += 1) {
-            for (let y = minY; y < maxY; y += 1) {
+        for (let x = minX ; x <= maxX; x += 1) {
+            for (let y = minY; y <= maxY; y += 1) {
                 const screenCoord = worldToScreenCoord({x, y});
                 const playerOnTile = this.playerOccupyingCoord(players, {x, y});
                 
                 if (playerOnTile == null) continue;
 
-                const sprite = this.spriteForPlayer(playerOnTile);
+                const sprite = this.spritePool.get('block');
                 sprite.x = screenCoord.x;
                 sprite.y = screenCoord.y;
 
                 sprite.scale.x = blockSize / sprite.width;
                 sprite.scale.y = blockSize / sprite.width;
 
+                this.usedSprites.push(sprite);
+
                 this.app.stage.addChild(sprite);
             }
         }
 
+        this.drawCenter(centerCoord, worldToScreenCoord, blockSize);
     }
 
     isEven = (num) => num % 2 == 0;
@@ -71,7 +78,7 @@ export default class Grid {
     calculateBlockSize(screenWidth, screenHeight) {        
         const byWidth = screenWidth / (GRID_WIDTH);
         const byHeight = screenHeight / (GRID_HEIGHT);
-        return Math.min(
+        return Math.max(
             Math.floor(byWidth), 
             Math.floor(byHeight));
     }
@@ -84,7 +91,18 @@ export default class Grid {
     }
 
     spriteForPlayer(player) {
-        return this.spriteFactory['block']();
+        return this.spritePool.get();
+    }
+
+    drawCenter(centerCoord, worldToScreenCoord, blockSize) {
+        const sprite = this.spritePool.get('square');
+        const screenCoord = worldToScreenCoord(centerCoord);
+        sprite.x = screenCoord.x;
+        sprite.y = screenCoord.y;
+
+        sprite.scale.x = blockSize / sprite.width;
+        sprite.scale.y = blockSize / sprite.width;
+        this.app.stage.addChild(sprite);
     }
 }
 

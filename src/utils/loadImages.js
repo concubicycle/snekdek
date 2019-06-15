@@ -19,7 +19,7 @@ const loadImages = (paths) => new Promise((resolve, reject) => {
     loader.load((loader, resources) => {
         const spriteCreators = ids.map(id => ({[id]: () => new TilingSprite(resources[id].texture) }));
         const spriteFactory = Object.assign({}, ...spriteCreators)        
-        resolve(spriteFactory);
+        resolve(id => spriteFactory[id]());
     })
 });
 

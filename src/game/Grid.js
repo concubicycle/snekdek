@@ -4,10 +4,10 @@ const GRID_WIDTH = 50;
 const GRID_HEIGHT = 50;
 
 
-export default class Grid {   
+export default class Grid {
 
     constructor(app, spriteFactory) {
-        this.app = app;        
+        this.app = app;
         this.spritePool = new SpritePool(spriteFactory);
     }
 
@@ -25,36 +25,36 @@ export default class Grid {
 
         const blockSize = this.calculateBlockSize(screenWidth, screenHeight);
         const halfBlock = blockSize / 2;
-        
+
         // the screen spans in terms of block size
         // @TODO: Edge case for even/odd sizes?
         let xSpan = Math.floor(screenWidth / blockSize);
         let ySpan = Math.floor(screenHeight / blockSize);
 
-        if(this.isEven(xSpan)) xSpan++;
-        if(this.isEven(ySpan)) ySpan++;
+        if (this.isEven(xSpan)) xSpan++;
+        if (this.isEven(ySpan)) ySpan++;
 
         const halfXSpan = Math.floor(xSpan / 2);
-        const halfYSpan = Math.floor(ySpan / 2);        
+        const halfYSpan = Math.floor(ySpan / 2);
 
         const minX = centerCoord.x - (halfXSpan);
-        const maxX = centerCoord.x + (halfXSpan);        
-        
+        const maxX = centerCoord.x + (halfXSpan);
+
         const minY = centerCoord.y - (halfYSpan);
         const maxY = centerCoord.y + (halfYSpan);
 
         function worldToScreenCoord(coord) {
             const x = (coord.x - minX) * blockSize;
             const y = (coord.y - minY) * blockSize;
-            
-            return {x, y};
+
+            return { x, y };
         }
 
-        for (let x = minX ; x <= maxX; x += 1) {
+        for (let x = minX; x <= maxX; x += 1) {
             for (let y = minY; y <= maxY; y += 1) {
-                const screenCoord = worldToScreenCoord({x, y});
-                const playerOnTile = this.playerOccupyingCoord(players, {x, y});
-                
+                const screenCoord = worldToScreenCoord({ x, y });
+                const playerOnTile = this.playerOccupyingCoord(players, { x, y });
+
                 if (playerOnTile == null) continue;
 
                 const sprite = this.spritePool.get('block');
@@ -70,23 +70,23 @@ export default class Grid {
             }
         }
 
-        this.drawCenter(centerCoord, worldToScreenCoord, blockSize);
+        //this.drawCenter(centerCoord, worldToScreenCoord, blockSize);
     }
 
     isEven = (num) => num % 2 == 0;
 
-    calculateBlockSize(screenWidth, screenHeight) {        
+    calculateBlockSize(screenWidth, screenHeight) {
         const byWidth = screenWidth / (GRID_WIDTH);
         const byHeight = screenHeight / (GRID_HEIGHT);
         return Math.max(
-            Math.floor(byWidth), 
+            Math.floor(byWidth),
             Math.floor(byHeight));
     }
 
     playerOccupyingCoord(players, coord) {
         return {};
-        return getRandomInt(2) == 1 
-            ? { }
+        return getRandomInt(2) == 1
+            ? {}
             : null;
     }
 

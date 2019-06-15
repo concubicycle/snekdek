@@ -7,16 +7,16 @@ import loadImages from './utils/loadImages';
 let connection = new SignalR.HubConnectionBuilder()
     .withUrl('/snekdekHub')
     .build();
- 
-connection.on("send", data => {
+
+connection.on("tick", data => {
     console.log(data);
 });
- 
+
 connection.start().then(() => connection.invoke("send", "Hello"));
 
 
 loadImages([
-    'block.png', 
+    'block.png',
     'square.png'
 ]).then((sprites) => {
     const game = new GameLoop(sprites);

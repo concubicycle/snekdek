@@ -2,32 +2,41 @@ namespace snekdek.Model
 {
     public class Segment
     {
-        private  Segment _next;
-        private  Segment _previous;
+        private static int NextSegmentId = 1;
+
+        public int SegmentId { get; set; }
+
+        public Segment Next { get; set; }
+        public Segment Previous { get; set; }
 
 
         public Segment(Segment previous)
         {
-            _previous = previous;
+            SegmentId = NextSegmentId++;
+            Previous = previous;
         }
 
-        public Segment() { }
-        
+        public Segment()
+        {
+            SegmentId = NextSegmentId++;
+        }
+
 
         public Coord Coord { get; set; } = new Coord();
 
-        public bool IsHead => _previous == null;
+        public bool IsHead => Previous == null;
 
-        
-        public void AddNewSegment()
+
+        public Segment AddNewSegment()
         {
-            if (_next != null)
+            if (Next != null)
             {
-                _next.AddNewSegment();
+                return Next.AddNewSegment();
             }
-            else 
+            else
             {
-                _next = new Segment(this);                
+                Next = new Segment(this);
+                return Next;
             }
         }
 
@@ -35,7 +44,7 @@ namespace snekdek.Model
         {
             if (IsHead)
             {
-                switch(dir)
+                switch (dir)
                 {
                     case Direction.Up:
                         Coord.Y++;
@@ -51,14 +60,14 @@ namespace snekdek.Model
                         break;
                 }
             }
-            else 
+            else
             {
-                Coord.SetFrom(_previous.Coord);
+                Coord.SetFrom(Previous.Coord);
             }
 
-            if (_next != null)
+            if (Next != null)
             {
-                _next.Advance(dir);
+                Next.Advance(dir);
             }
         }
     }

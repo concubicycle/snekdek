@@ -12,7 +12,6 @@ APP_CSPROJ=$APP_DIR/snekdek.csproj
 
 BUILD_DIR=$APP_DIR/bin/Release/netcoreapp2.2/publish/
 PUBLISH_DIR=/home/saveliyb/app
-PUBLISH_FOLDER=/home/saveliyb/app/publish
 
 
 ########################
@@ -25,13 +24,13 @@ dotnet publish -c Release $APP_DIR
 # ssh $USER@$HOST 'systemctl stop snekdek.service'
 
 # Detele currently deployed folder
-ssh $USER@$HOST "rm -rf $PUBLISH_FOLDER"
+ssh $USER@$HOST "rm -rf $PUBLISH_DIR"
 
 # Copy publish folder over to server
 scp -rp $BUILD_DIR $USER@$HOST:$PUBLISH_DIR
 
 # Start systemd service, which will restart the auth app
-ssh root@$HOST 'systemctl start snekdek.service'
+sudo ssh $USER@$HOST 'systemctl start snekdek.service'
 
 
 

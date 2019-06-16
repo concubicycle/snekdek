@@ -30,7 +30,7 @@ ssh $USER@$HOST "rm -rf $PUBLISH_DIR"
 scp -rp $BUILD_DIR $USER@$HOST:$PUBLISH_DIR
 
 # Start systemd service, which will restart the auth app
-sudo ssh $USER@$HOST 'systemctl start snekdek.service'
+# ssh $USER@$HOST 'systemctl start snekdek.service'
 
 
 

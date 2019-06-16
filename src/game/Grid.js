@@ -1,19 +1,33 @@
 import SpritePool from './SpritePool'
 import CoordPlayerLookup from './CoordPlayerLookup'
+import {Text, Container} from 'pixi.js';
 
 const GRID_WIDTH = 50;
 const GRID_HEIGHT = 50;
 
+ 
 
 export default class Grid {
 
     constructor(app, spriteFactory) {
         this.app = app;
         this.spritePool = new SpritePool(spriteFactory);
+
+        this.playerLayer = new Container();
+        this.textLayer = new Container();
+        this.app.stage.addChild(this.playerLayer);
+        this.app.stage.addChild(this.textLayer);
+
     }
 
+    userIdToText = new Map();
+
     redraw(state, localPlayer) {
-        const players = state.users;
+        const players = state.users.filter(u => u.state == 1);
+
+        const deadPlayers = state.users.filter(u => u.state == 0);
+        this.hideDeadPlayerText(deadPlayers);
+
         const allFood = state.allFood;
 
         const coordPlayerLookup = new CoordPlayerLookup(players, allFood);
@@ -68,10 +82,33 @@ export default class Grid {
                     || y >= state.gameBounds.maxY;
 
                 if (outOfBounds)  this.addSprite('wall', screenCoord, blockSize);                
-                if (playerOnTile) this.addSprite('block', screenCoord, blockSize);
+                if (playerOnTile) {
+                    if (playerOnTile.head.coords.x == x && playerOnTile.head.coords.y == y) 
+                        this.setTextFor(playerOnTile, screenCoord);                    
+
+                     this.addSprite('block', screenCoord, blockSize);
+                }
                 if (foodOnTile) this.addSprite('food', screenCoord, blockSize);
             }
         }        
+    }
+
+    setTextFor(player, screenCoord) {
+        let text = this.userIdToText.get(player.userId);
+        if (!text) {            
+            text = new Text(player.name, {
+                font: "bold 12px Roboto", // Set  style, size and font
+                fill: '#3498db', // Set fill color to blue
+                align: 'center', // Center align the text, since it's multiline                
+            });
+           
+            this.userIdToText.set(player.userId, text);
+            
+            this.textLayer.addChild(text);
+        }
+
+        text.x = screenCoord.x;
+        text.y = screenCoord.y - 20;
     }
 
     addSprite(name, screenCoord, blockSize) {
@@ -85,7 +122,7 @@ export default class Grid {
             sprite.scale.set(scale, scale);
         }
         
-        this.app.stage.addChild(sprite);
+        this.playerLayer.addChild(sprite);
     }
     
     isEven = (num) => num % 2 == 0;
@@ -107,4 +144,12 @@ export default class Grid {
     spriteForPlayer(player) {
         return this.spritePool.get();
     }   
+
+    hideDeadPlayerText(players) {
+        players.forEach(p => {
+            const text = this.userIdToText.get(p.userId);
+            this.textLayer.removeChild(text);
+            text.destroy(true);
+        });
+    }
 }

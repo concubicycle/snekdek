@@ -34,7 +34,7 @@ export default class GameLoop {
     }
 
     hasPlayerDied(newUserState) {
-        if (this.lastLocalUser != null) {
+        if (this.lastLocalUser != null && newUserState != null) {
             if (this.lastLocalUser.state == 1 && newUserState.state == 0) {
                 return true;
             }

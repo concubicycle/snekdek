@@ -12,10 +12,10 @@ const runGame = (name) => {
         'square.png',
         'food.png',
         'wall.png'
-    ]).then(onResourcesReady)
+    ]).then(sprites => onResourcesReady(sprites, name))
 }
 
-function onResourcesReady(sprites) {
+function onResourcesReady(sprites, name) {
     const userId = guid();
     const userJoin = { name, userId };
     let state = {};
@@ -43,8 +43,10 @@ function onResourcesReady(sprites) {
     const game = new GameLoop(sprites, onPlayerDied);
 
 
-    connection.on("tick", data => {
+    connection.on("tick", data => {        
         state = JSON.parse(data);
+
+        populateUsersList(state.users);
 
         var localUser = state.users.find(u => u.userId == userId);
 
@@ -99,6 +101,22 @@ function onResourcesReady(sprites) {
     }
 }
 
+
+function populateUsersList(users) {
+    const players = document.getElementById('players');
+    const list = document.getElementById('player-list');
+    const items = users.map(u => {
+        const li = document.createElement('li');
+        li.innerText = u.name;
+        return li;
+    })
+    
+    while (list.firstChild) {
+        list.removeChild(list.firstChild);
+    }
+
+    items.forEach(el => list.appendChild(el));
+}
 
 function guid(a) { return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, guid) }
 

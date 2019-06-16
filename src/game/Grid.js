@@ -12,11 +12,8 @@ export default class Grid {
         this.spritePool = new SpritePool(spriteFactory);
     }
 
-    usedSprites = [];
-
-
-    redraw(players, localPlayer) {
-        const coordPlayerLookup = new CoordPlayerLookup(players);
+    redraw(players, localPlayer, allFood) {
+        const coordPlayerLookup = new CoordPlayerLookup(players, allFood);
 
         this.spritePool.returnAll();
 
@@ -57,19 +54,33 @@ export default class Grid {
             for (let y = minY; y <= maxY; y += 1) {
                 const screenCoord = worldToScreenCoord({ x, y });
 
-                const playerOnTile = coordPlayerLookup.playerForCoords({x, y}); 
+                const coords = {x, y};
+                const playerOnTile = coordPlayerLookup.playerForCoords(coords); 
+                const foodOnTile = coordPlayerLookup.foodForCoords(coords)
 
-                if (playerOnTile == null) continue;
+                //@TODO: refactor?
+                if (playerOnTile)
+                {
+                    const sprite = this.spritePool.get('block');
+                    sprite.x = screenCoord.x;
+                    sprite.y = screenCoord.y;
+    
+                    sprite.scale.x = blockSize / sprite.width;
+                    sprite.scale.y = blockSize / sprite.width;
+                    
+                    this.app.stage.addChild(sprite);
+                }                
 
-                const sprite = this.spritePool.get('block');
-                sprite.x = screenCoord.x;
-                sprite.y = screenCoord.y;
+                if (foodOnTile) {
+                    const sprite = this.spritePool.get('food');
+                    sprite.x = screenCoord.x;
+                    sprite.y = screenCoord.y;
 
-                sprite.scale.x = blockSize / sprite.width;
-                sprite.scale.y = blockSize / sprite.width;
+                    sprite.scale.x = blockSize / sprite.width;
+                    sprite.scale.y = blockSize / sprite.width;
 
-                this.usedSprites.push(sprite);
-                this.app.stage.addChild(sprite);                
+                    this.app.stage.addChild(sprite);
+                }
             }
         }        
     }

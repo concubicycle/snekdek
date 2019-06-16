@@ -28,9 +28,14 @@ namespace snekdek.Model
             return HeadIntersectRecurse(other.Head);
         }
 
+        public bool HeadIntersects(Coord coords)
+        {
+            return coords.Equals(Head.Coords);
+        }
+
         private bool HeadIntersectRecurse(Segment other)
         {
-            if (other.Coords == Head.Coords) return true;
+            if (other.Coords.Equals(Head.Coords)) return true;
             if (other.Next == null) return false;
             return HeadIntersectRecurse(other.Next);
         }

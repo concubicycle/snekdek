@@ -10,7 +10,8 @@ import 'pixi-sound';
 const runGame = (name) => {
     loadImages([
         'block.png',
-        'square.png'
+        'square.png',
+        'food.png'
     ]).then((sprites) => {
 
         const userId = guid();
@@ -23,13 +24,13 @@ const runGame = (name) => {
         let connection = new SignalR.HubConnectionBuilder()
             .withUrl('/snekdekHub')
             .build();
-      
-        connection.on("tick", data => {            
+
+        connection.on("tick", data => {
             state = JSON.parse(data);
 
             var localUser = state.users.find(u => u.userId == userId);
 
-            if(!localUser) {
+            if (!localUser) {
                 return;
             }
 
@@ -48,8 +49,37 @@ const runGame = (name) => {
         connection.start().then(() => {
             connection.invoke("UserJoinMessage", JSON.stringify(userJoin)).catch(function (err) {
                 return console.error(err.toString());
-            });    
+            });
         });
+
+        window.onbeforeunload = () => {
+            connection.stop();
+        }
+
+        function press(e) {
+            if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */ || e.keyCode === 90 /* z */) {
+                connection.invoke("PlayerInputMessage", 0).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+            if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
+                connection.invoke("PlayerInputMessage", 1).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+            if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) {
+                connection.invoke("PlayerInputMessage", 2).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+            if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */ || e.keyCode === 81 /* q */) {
+                connection.invoke("PlayerInputMessage", 3).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+        }
+
+        document.addEventListener('keydown', press)
     })
 
 }

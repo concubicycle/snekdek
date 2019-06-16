@@ -13,12 +13,9 @@ export default class GameLoop {
 
         this.grid = new Grid(this.app, sprites);
         this.window = new Window(this.app);
-
-        const localPlayer = { head: { coords: { x: 2000, y: 1000 } } };
-        this.grid.redraw([], localPlayer);
     }
 
     refresh(state, localUser) {        
-        this.grid.redraw(state.users, localUser);
+        this.grid.redraw(state.users, localUser, state.allFood);
     }
 }

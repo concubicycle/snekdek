@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace snekdek.Model
 {
     public class Segment
@@ -6,7 +8,11 @@ namespace snekdek.Model
 
         public int SegmentId { get; set; }
 
+        private bool NewlyAdded { get; set; } = true;
+
         public Segment Next { get; set; }
+
+        [JsonIgnore]
         public Segment Previous { get; set; }
 
 
@@ -36,24 +42,32 @@ namespace snekdek.Model
             else
             {
                 Next = new Segment(this);
+                Next.Coords.X = Coords.X;
+                Next.Coords.Y = Coords.Y;
+
                 return Next;
             }
         }
 
         public void Advance(Direction dir)
         {
+            if (Next != null)
+            {
+                Next.Advance(dir);
+            }
+
             if (IsHead)
             {
                 switch (dir)
                 {
                     case Direction.Up:
-                        Coords.Y++;
+                        Coords.Y--;
                         break;
                     case Direction.Right:
                         Coords.X++;
                         break;
                     case Direction.Down:
-                        Coords.Y--;
+                        Coords.Y++;
                         break;
                     case Direction.Left:
                         Coords.X--;
@@ -63,11 +77,6 @@ namespace snekdek.Model
             else
             {
                 Coords.SetFrom(Previous.Coords);
-            }
-
-            if (Next != null)
-            {
-                Next.Advance(dir);
             }
         }
     }

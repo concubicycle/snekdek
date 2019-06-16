@@ -28,6 +28,12 @@ namespace snekdek.Model
             return HeadIntersectRecurse(other.Head);
         }
 
+        public bool HeadIntersectsNonHead(User other)
+        {
+            if(other.Head.Next == null) return false;
+            return HeadIntersectRecurse(other.Head.Next);
+        }
+
         public bool HeadIntersects(Coord coords)
         {
             return coords.Equals(Head.Coords);
@@ -43,7 +49,7 @@ namespace snekdek.Model
 
     public enum UserState
     {
-        Active,
-        Dead
+        Dead = 0,
+        Active = 1,
     }
 }

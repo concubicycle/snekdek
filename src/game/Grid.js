@@ -12,7 +12,10 @@ export default class Grid {
         this.spritePool = new SpritePool(spriteFactory);
     }
 
-    redraw(players, localPlayer, allFood) {
+    redraw(state, localPlayer) {
+        const players = state.users;
+        const allFood = state.allFood;
+
         const coordPlayerLookup = new CoordPlayerLookup(players, allFood);
 
         this.spritePool.returnAll();
@@ -58,40 +61,33 @@ export default class Grid {
                 const playerOnTile = coordPlayerLookup.playerForCoords(coords); 
                 const foodOnTile = coordPlayerLookup.foodForCoords(coords)
 
-                //@TODO: refactor?
-                if (playerOnTile)
-                {
-                    const sprite = this.spritePool.get('block');
-                    sprite.x = screenCoord.x;
-                    sprite.y = screenCoord.y;
-    
-                    sprite.scale.x = blockSize / sprite.width;
-                    sprite.scale.y = blockSize / sprite.width;
-                    
-                    this.app.stage.addChild(sprite);
-                }                
+                const outOfBounds = 
+                    x <= state.gameBounds.minX 
+                    || x >= state.gameBounds.maxX 
+                    || y <= state.gameBounds.minY 
+                    || y >= state.gameBounds.maxY;
 
-                if (foodOnTile) {
-                    const sprite = this.spritePool.get('food');
-                    sprite.x = screenCoord.x;
-                    sprite.y = screenCoord.y;
-
-                    sprite.scale.x = blockSize / sprite.width;
-                    sprite.scale.y = blockSize / sprite.width;
-
-                    this.app.stage.addChild(sprite);
-                }
+                if (outOfBounds)  this.addSprite('wall', screenCoord, blockSize);                
+                if (playerOnTile) this.addSprite('block', screenCoord, blockSize);
+                if (foodOnTile) this.addSprite('food', screenCoord, blockSize);
             }
         }        
     }
 
-    getCoordToPlayer(players) {
-        const coordToPlayers = Map();
-        players.forEach(player => {
-            
-        });
-    }
+    addSprite(name, screenCoord, blockSize) {
+        const sprite = this.spritePool.get(name);
+        sprite.x = screenCoord.x;
+        sprite.y = screenCoord.y;
 
+        if ( sprite.scale.x == 1 && sprite.scale.y == 1)
+        {
+            const scale = blockSize / sprite.width;
+            sprite.scale.set(scale, scale);
+        }
+        
+        this.app.stage.addChild(sprite);
+    }
+    
     isEven = (num) => num % 2 == 0;
 
     calculateBlockSize(screenWidth, screenHeight) {
@@ -110,21 +106,5 @@ export default class Grid {
 
     spriteForPlayer(player) {
         return this.spritePool.get();
-    }
-
-    drawCenter(centerCoord, worldToScreenCoord, blockSize) {
-        const sprite = this.spritePool.get('square');
-        const screenCoord = worldToScreenCoord(centerCoord);
-        sprite.x = screenCoord.x;
-        sprite.y = screenCoord.y;
-
-        sprite.scale.x = blockSize / sprite.width;
-        sprite.scale.y = blockSize / sprite.width;
-        this.app.stage.addChild(sprite);
-    }
-}
-
-
-function getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
+    }   
 }

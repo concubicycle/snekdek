@@ -2,9 +2,14 @@ import { Application, Loader, Sprite, TilingSprite } from 'pixi.js';
 
 const loader = Loader.shared;
 
+// only load once, cache the output of this module
+let spriteFactoryFunc = null;
+
 /// Takes an array of image paths, ands loads them
 const loadImages = (paths) => new Promise((resolve, reject) => {
-    const sprites = {};
+
+    if (spriteFactoryFunc) resolve(spriteFactoryFunc);
+        
     const ids = [];
 
     for(const p of paths) {
@@ -17,9 +22,11 @@ const loadImages = (paths) => new Promise((resolve, reject) => {
     loader.onError.add(() => console.log('problem loading images'));    
 
     loader.load((loader, resources) => {
-        const spriteCreators = ids.map(id => ({[id]: () => new TilingSprite(resources[id].texture) }));
-        const spriteFactory = Object.assign({}, ...spriteCreators)        
-        resolve(id => spriteFactory[id]());
+        const spriteCreators = ids.map(id => ({[id]: () => new Sprite(resources[id].texture) }));
+        const spriteFactory = Object.assign({}, ...spriteCreators)
+
+        spriteFactoryFunc = id => spriteFactory[id]();
+        resolve(spriteFactoryFunc);
     })
 });
 

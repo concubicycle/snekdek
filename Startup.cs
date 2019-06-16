@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using snekdek.GameServer;
+using snekdek.Utils;
 
 namespace snekdek
 {
@@ -23,6 +24,7 @@ namespace snekdek
             services.AddSignalR();
 
             services.AddSingleton<Game, Game>();
+            services.AddSingleton<JsonParser, JsonParser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

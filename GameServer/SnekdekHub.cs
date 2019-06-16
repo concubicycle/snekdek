@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using snekdek.Model;
+using snekdek.Utils;
 
 namespace snekdek.GameServer
 {
@@ -12,17 +13,13 @@ namespace snekdek.GameServer
         private static readonly ConcurrentDictionary<string, User> ClientToUser =
             new ConcurrentDictionary<string, User>();
 
-        private DefaultContractResolver _contractResolver = new DefaultContractResolver
-        {
-            NamingStrategy = new CamelCaseNamingStrategy()
-        };
-
-
         private readonly Game _game;
+        private readonly JsonParser _parser;
 
-        public SnekdekHub(Game game)
+        public SnekdekHub(Game game, JsonParser parser)
         {
             _game = game;
+            _parser = parser;
         }
 
         public async Task UserJoinMessage(string userJoinJson)
@@ -38,7 +35,7 @@ namespace snekdek.GameServer
             
             ClientToUser[Context.ConnectionId] = user;
 
-            var userJson = Serialize(user);
+            var userJson = _parser.Serialize(user);
 
             await Clients.All.SendAsync(MessageKey.UserJoin, userJson);
         }
@@ -46,6 +43,9 @@ namespace snekdek.GameServer
         public void PlayerInputMessage(int dir)
         {
             var user = ClientToUser[Context.ConnectionId];
+
+            if(user.Direction.IsOpposite((Direction)dir)) return;
+            
             user.Direction = (Direction) dir;
         }
 
@@ -60,15 +60,6 @@ namespace snekdek.GameServer
             if (user != null) {
                 _game.RemoveUser(user);
             }
-        }
-
-        private string Serialize<T>(T obj)
-        {
-            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
-            {
-                ContractResolver = _contractResolver,
-                Formatting = Formatting.None
-            });
         }
     }
 }

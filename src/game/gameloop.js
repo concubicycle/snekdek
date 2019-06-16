@@ -4,10 +4,12 @@ import Window from './Window';
 import { Application } from 'pixi.js';
 
 export default class GameLoop {
-    constructor(sprites) {
+    constructor(sprites, onPlayerDied) {
         this.app = new Application({
             autoResize: true,
         });
+
+        this.onPlayerDied = onPlayerDied;
 
         this.sprites = sprites;
 
@@ -15,7 +17,35 @@ export default class GameLoop {
         this.window = new Window(this.app);
     }
 
-    refresh(state, localUser) {        
-        this.grid.redraw(state.users, localUser, state.allFood);
+    lastLocalUser = null;
+    active = true;
+
+    refresh(state, localUser) {
+        if (this.hasPlayerDied(localUser)) {            
+            //this.teardown();
+            if (this.onPlayerDied) this.onPlayerDied();
+        }
+        else if (this.active)
+        {
+            this.grid.redraw(state, localUser);
+        }
+
+        this.lastLocalUser = localUser;
+    }
+
+    hasPlayerDied(newUserState) {
+        if (this.lastLocalUser != null) {
+            if (this.lastLocalUser.state == 1 && newUserState.state == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    teardown() {
+        this.app.stage.destroy(true);
+        this.app.stop();
+        this.app.destroy(true);
+        this.active = false;
     }
 }

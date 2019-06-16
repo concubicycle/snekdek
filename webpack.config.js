@@ -3,6 +3,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const OutputDir = path.resolve(__dirname, 'wwwroot');
+const IndexTemplate = path.resolve(__dirname, 'src/index.template.html');
 
 const Mode = 'development'
 
@@ -42,7 +43,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: IndexTemplate
+    }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional

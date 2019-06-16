@@ -21,6 +21,8 @@ namespace snekdek
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
+
+            services.AddSingleton<Game, Game>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,8 +40,8 @@ namespace snekdek
                routes.MapHub<SnekdekHub>("/snekdekHub");
            });
 
-            var serviceProvider = app.ApplicationServices;
-            Hub = serviceProvider.GetService<IHubContext<SnekdekHub>>();
+            // var serviceProvider = app.ApplicationServices;
+            // Hub = serviceProvider.GetService<IHubContext<SnekdekHub>>();
         }
     }
 }

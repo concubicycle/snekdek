@@ -22,7 +22,7 @@ namespace snekdek.Model
         }
 
 
-        public Coord Coord { get; set; } = new Coord();
+        public Coord Coords { get; set; } = new Coord();
 
         public bool IsHead => Previous == null;
 
@@ -47,22 +47,22 @@ namespace snekdek.Model
                 switch (dir)
                 {
                     case Direction.Up:
-                        Coord.Y++;
+                        Coords.Y++;
                         break;
                     case Direction.Right:
-                        Coord.X++;
+                        Coords.X++;
                         break;
                     case Direction.Down:
-                        Coord.Y--;
+                        Coords.Y--;
                         break;
                     case Direction.Left:
-                        Coord.X--;
+                        Coords.X--;
                         break;
                 }
             }
             else
             {
-                Coord.SetFrom(Previous.Coord);
+                Coords.SetFrom(Previous.Coords);
             }
 
             if (Next != null)

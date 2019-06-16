@@ -11,6 +11,7 @@
   "dependencies": {
     "@aspnet/signalr": "^1.1.4",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "pixi-sound": "^3.0.3",
     "pixi.js": "^5.0.4"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import SpritePool from './SpritePool'
+import CoordPlayerLookup from './CoordPlayerLookup'
 
 const GRID_WIDTH = 50;
 const GRID_HEIGHT = 50;
@@ -15,6 +16,8 @@ export default class Grid {
 
 
     redraw(players, localPlayer) {
+        const coordPlayerLookup = new CoordPlayerLookup(players);
+
         this.spritePool.returnAll();
 
         const centerCoord = localPlayer.head.coords;
@@ -53,7 +56,8 @@ export default class Grid {
         for (let x = minX; x <= maxX; x += 1) {
             for (let y = minY; y <= maxY; y += 1) {
                 const screenCoord = worldToScreenCoord({ x, y });
-                const playerOnTile = this.playerOccupyingCoord(players, { x, y });
+
+                const playerOnTile = coordPlayerLookup.playerForCoords({x, y}); 
 
                 if (playerOnTile == null) continue;
 
@@ -65,12 +69,16 @@ export default class Grid {
                 sprite.scale.y = blockSize / sprite.width;
 
                 this.usedSprites.push(sprite);
-
-                this.app.stage.addChild(sprite);
+                this.app.stage.addChild(sprite);                
             }
-        }
+        }        
+    }
 
-        //this.drawCenter(centerCoord, worldToScreenCoord, blockSize);
+    getCoordToPlayer(players) {
+        const coordToPlayers = Map();
+        players.forEach(player => {
+            
+        });
     }
 
     isEven = (num) => num % 2 == 0;
@@ -81,13 +89,12 @@ export default class Grid {
         return Math.max(
             Math.floor(byWidth),
             Math.floor(byHeight));
-    }
+    }    
 
-    playerOccupyingCoord(players, coord) {
-        return {};
-        return getRandomInt(2) == 1
-            ? {}
-            : null;
+    playerOccupiesCoord(segment, coord) {
+        if (segment.coords.x == coord.x && segment.coords.y == coord.y) return true;
+        if (segment.next != null) return this.playerOccupiesCoord(segment.next, coord);
+        return false;
     }
 
     spriteForPlayer(player) {

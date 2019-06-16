@@ -20,6 +20,7 @@ export default class SpritePool {
         }
 
         const spr = this.unusedSprites[id].pop();
+        this.usedSprites[id].push(spr);
         spr.visible = true;
         return spr;
     }
@@ -32,7 +33,7 @@ export default class SpritePool {
 
     returnAll () {
         for (const id in this.usedSprites) {
-            while (this.usedSprites.length > 0) {
+            while (this.usedSprites[id].length > 0) {
                 const sprite = this.usedSprites[id].pop();
                 sprite.visible = false;
                 this.unusedSprites[id].push(sprite);

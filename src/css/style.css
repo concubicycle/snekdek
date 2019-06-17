@@ -18,7 +18,7 @@ body {
 
     min-width: 200px;
     max-height: 700px;
-    overflow-y: scroll;
+    overflow-y: hidden;
 }
 
 #players li {

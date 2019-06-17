@@ -1,5 +1,6 @@
 import Grid from './Grid';
 import Window from './Window';
+import GameSound from './GameSound'
 
 import { Application } from 'pixi.js';
 
@@ -30,6 +31,10 @@ export default class GameLoop {
             this.grid.redraw(state, localUser);
         }
 
+        if (this.hasPlayerGrown(localUser)) {
+            GameSound.score.play();
+        }
+
         this.lastLocalUser = localUser;
     }
 
@@ -38,6 +43,13 @@ export default class GameLoop {
             if (this.lastLocalUser.state == 1 && newUserState.state == 0) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    hasPlayerGrown(newUserState) {
+        if (this.lastLocalUser != null && newUserState != null) {
+            return this.lastLocalUser.score < newUserState.score;
         }
         return false;
     }

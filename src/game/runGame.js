@@ -1,11 +1,8 @@
-import * as SignalR from '@aspnet/signalr';
+import {HubConnectionBuilder} from '@aspnet/signalr';
 
 import '../css/style.css';
 import GameLoop from '../game/GameLoop';
 import loadImages from '../utils/loadImages';
-
-import './sound';
-
 
 const runGame = (name) => {
     loadImages([
@@ -21,7 +18,7 @@ function onResourcesReady(sprites, name) {
     const userJoin = { name, userId };
     let state = {};
 
-    let connection = new SignalR.HubConnectionBuilder()
+    let connection = new HubConnectionBuilder()
     .withUrl('/snekdekHub')
     .build();
     

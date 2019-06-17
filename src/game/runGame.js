@@ -43,6 +43,7 @@ function onResourcesReady(sprites, name) {
     const gameEl = document.getElementById('game');
     gameEl.classList.remove('hidden');
 
+    GameSound.one.loop = true;
     GameSound.one.play();
     const game = new GameLoop(sprites, onPlayerDied);
 
@@ -59,6 +60,8 @@ function onResourcesReady(sprites, name) {
         }
 
         game.refresh(state, localUser);
+
+        GameSound.tick.play();
     });
 
     connection.on("userjoin", userJson => {

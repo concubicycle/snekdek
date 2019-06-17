@@ -12,7 +12,7 @@ namespace snekdek.GameServer
     public class Game
     {
         public const int MaxFood = 50;
-        public TimeSpan _timeSpan = TimeSpan.FromMilliseconds(180);
+        public TimeSpan _timeSpan = TimeSpan.FromMilliseconds(210);
         private Timer _tickTimer;
 
         public TimeSpan _foodSpawnInterval = TimeSpan.FromSeconds(4);

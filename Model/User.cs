@@ -10,7 +10,9 @@ namespace snekdek.Model
         public Segment Head { get; set; } = new Segment();
         public UserState State { get; set; } = UserState.Active;
         public Direction Direction { get; set; }
+        public Direction PendingDirection { get; set; }
 
+        public int Score { get; set; }
 
 
         public void Advance()
@@ -20,6 +22,7 @@ namespace snekdek.Model
 
         public void AddSegment()
         {
+            Score++;
             var newSeg = Head.AddNewSegment();
         }
 

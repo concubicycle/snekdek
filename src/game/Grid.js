@@ -97,8 +97,8 @@ export default class Grid {
         let text = this.userIdToText.get(player.userId);
         if (!text) {            
             text = new Text(player.name, {
-                font: "bold 12px Roboto", // Set  style, size and font
-                fill: '#3498db', // Set fill color to blue
+                font: "12px Roboto", // Set  style, size and font
+                fill: '#00ff00', // Set fill color to green
                 align: 'center', // Center align the text, since it's multiline                
             });
            
@@ -108,7 +108,7 @@ export default class Grid {
         }
 
         text.x = screenCoord.x;
-        text.y = screenCoord.y - 20;
+        text.y = screenCoord.y - 35;
     }
 
     addSprite(name, screenCoord, blockSize) {

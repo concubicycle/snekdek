@@ -13,7 +13,8 @@ module.exports = {
   devtool: 'eval-source-map',
   output: {
     filename: 'bundle.js',
-    path: OutputDir
+    path: OutputDir,  
+    chunkFilename: '[name].bundle.js',
   },
   module: {
     rules: [
@@ -22,7 +23,7 @@ module.exports = {
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
-            options: {              
+            options: {
               hmr: process.env.NODE_ENV === Mode,
             },
           },
@@ -35,7 +36,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            plugins: ['@babel/plugin-proposal-class-properties', 'syntax-async-functions'],
+            plugins: ['@babel/plugin-proposal-class-properties', 'syntax-async-functions', '@babel/plugin-syntax-dynamic-import'],
             presets: ['@babel/preset-env']
           }
         }

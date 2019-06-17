@@ -12,7 +12,7 @@ namespace snekdek.GameServer
     public class Game
     {
         public const int MaxFood = 50;
-        public TimeSpan _timeSpan = TimeSpan.FromMilliseconds(250);
+        public TimeSpan _timeSpan = TimeSpan.FromMilliseconds(180);
         private Timer _tickTimer;
 
         public TimeSpan _foodSpawnInterval = TimeSpan.FromSeconds(4);
@@ -34,7 +34,7 @@ namespace snekdek.GameServer
         public void Start()
         {
             _tickTimer = new Timer(Tick, null, _timeSpan, _timeSpan);
-            _foodTimer = new Timer(SpawnFood, null, TimeSpan.FromSeconds(15), _foodSpawnInterval);
+            _foodTimer = new Timer(SpawnFood, null, TimeSpan.FromSeconds(3), _foodSpawnInterval);
         }
 
         public User AddUser(UserJoin userJoin)
@@ -135,6 +135,8 @@ namespace snekdek.GameServer
             {
                 foreach (var user in _state.Users)
                 {
+                    user.Direction = user.PendingDirection;
+
                     user.Advance();                    
 
                     // This is O(N^bad). needs optimization
@@ -149,7 +151,7 @@ namespace snekdek.GameServer
                     var matchedFood = _state.AllFood.FirstOrDefault(f => user.HeadIntersects(f.Coords));
                     if(matchedFood != null)
                     {
-                        user.Head.AddNewSegment();
+                        user.AddSegment();
                         _state.AllFood.Remove(matchedFood);
                     }
 

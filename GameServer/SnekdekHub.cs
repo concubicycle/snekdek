@@ -46,7 +46,7 @@ namespace snekdek.GameServer
 
             if(user.Direction.IsOpposite((Direction)dir)) return;
             
-            user.Direction = (Direction) dir;
+            user.PendingDirection = (Direction) dir;
         }
 
         public override async Task OnDisconnectedAsync(System.Exception exception)

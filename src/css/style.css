@@ -14,10 +14,15 @@ body {
     height: 50vh;
     width: 9vw;
     background: rgba(50, 50, 50, 0.2);
-    list-style-type: none;
+    
+
+    min-width: 200px;
+    max-height: 700px;
+    overflow-y: scroll;
 }
 
 #players li {
     color: #00ff00;
-    font-weight: bold;
+    font-weight: bold;    
+    list-style-type: none;
 }

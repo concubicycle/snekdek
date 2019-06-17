@@ -24,5 +24,24 @@ namespace snekdek.Model
             X = other.X;
             Y = other.Y;
         }
+
+        public void AdvanceInDir(Direction dir)
+        {
+            switch (dir)
+            {
+                case Direction.Up:
+                    Y--;
+                    break;
+                case Direction.Right:
+                    X++;
+                    break;
+                case Direction.Down:
+                    Y++;
+                    break;
+                case Direction.Left:
+                    X--;
+                    break;
+            }
+        }
     }
 }

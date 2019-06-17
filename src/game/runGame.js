@@ -4,7 +4,8 @@ import '../css/style.css';
 import GameLoop from '../game/GameLoop';
 import loadImages from '../utils/loadImages';
 
-import 'pixi-sound';
+import './sound';
+
 
 const runGame = (name) => {
     loadImages([
@@ -107,7 +108,7 @@ function populateUsersList(users) {
     const list = document.getElementById('player-list');
     const items = users.map(u => {
         const li = document.createElement('li');
-        li.innerText = u.name;
+        li.innerText = `${u.name} (${u.score})`;
         return li;
     })
     

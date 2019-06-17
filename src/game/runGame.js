@@ -4,6 +4,8 @@ import '../css/style.css';
 import GameLoop from '../game/GameLoop';
 import loadImages from '../utils/loadImages';
 
+import GameSound from './GameSound'
+
 const runGame = (name) => {
     loadImages([
         'block.png',
@@ -18,6 +20,8 @@ function onResourcesReady(sprites, name) {
     const userJoin = { name, userId };
     let state = {};
 
+    hideFooter() 
+
     let connection = new HubConnectionBuilder()
     .withUrl('/snekdekHub')
     .build();
@@ -26,6 +30,7 @@ function onResourcesReady(sprites, name) {
         window.onbeforeunload = null;
         document.removeEventListener('keydown', press);
         connection.stop();
+        GameSound.one.stop();
 
         const game = document.getElementById('game');
         game.classList.add('hidden');
@@ -38,6 +43,7 @@ function onResourcesReady(sprites, name) {
     const gameEl = document.getElementById('game');
     gameEl.classList.remove('hidden');
 
+    GameSound.one.play();
     const game = new GameLoop(sprites, onPlayerDied);
 
 
@@ -99,6 +105,10 @@ function onResourcesReady(sprites, name) {
     }
 }
 
+function hideFooter() {
+    const footer = document.getElementById('footer');
+    footer.classList.add()
+}
 
 function populateUsersList(users) {
     const players = document.getElementById('players');

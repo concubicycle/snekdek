@@ -1,11 +1,11 @@
 import SpritePool from './SpritePool'
 import CoordPlayerLookup from './CoordPlayerLookup'
-import {Text, Container} from 'pixi.js';
+import { Text, Container, Texture, Sprite } from 'pixi.js';
 
 const GRID_WIDTH = 50;
 const GRID_HEIGHT = 50;
 
- 
+
 
 export default class Grid {
 
@@ -13,10 +13,15 @@ export default class Grid {
         this.app = app;
         this.spritePool = new SpritePool(spriteFactory);
 
+        this.bgLayer = new Container();
         this.playerLayer = new Container();
         this.textLayer = new Container();
+
+        // order is important
+        this.app.stage.addChild(this.bgLayer);
         this.app.stage.addChild(this.playerLayer);
         this.app.stage.addChild(this.textLayer);
+
 
     }
 
@@ -71,39 +76,52 @@ export default class Grid {
             for (let y = minY; y <= maxY; y += 1) {
                 const screenCoord = worldToScreenCoord({ x, y });
 
-                const coords = {x, y};
-                const playerOnTile = coordPlayerLookup.playerForCoords(coords); 
+                const coords = { x, y };
+                const playerOnTile = coordPlayerLookup.playerForCoords(coords);
                 const foodOnTile = coordPlayerLookup.foodForCoords(coords)
 
-                const outOfBounds = 
-                    x <= state.gameBounds.minX 
-                    || x >= state.gameBounds.maxX 
-                    || y <= state.gameBounds.minY 
+                const outOfBounds =
+                    x <= state.gameBounds.minX
+                    || x >= state.gameBounds.maxX
+                    || y <= state.gameBounds.minY
                     || y >= state.gameBounds.maxY;
 
-                if (outOfBounds)  this.addSprite('wall', screenCoord, blockSize);                
+                if (outOfBounds) this.addSprite('wall', screenCoord, blockSize);
                 if (playerOnTile) {
-                    if (playerOnTile.head.coords.x == x && playerOnTile.head.coords.y == y) 
-                        this.setTextFor(playerOnTile, screenCoord);                    
+                    if (playerOnTile.head.coords.x == x && playerOnTile.head.coords.y == y)
+                        this.setTextFor(playerOnTile, screenCoord);
 
-                     this.addSprite('block', screenCoord, blockSize);
+                    this.addSprite('block', screenCoord, blockSize);
                 }
+
                 if (foodOnTile) this.addSprite('food', screenCoord, blockSize);
+
+                if (!outOfBounds) {
+                    const color = this.colorForCoord(coords);
+
+                    if (!this.spritePool.has(color.id)) {
+                        const sprt = new Sprite(Texture.WHITE);
+                        sprt.tint = color.val;
+                        this.spritePool.add(color.id, sprt);
+                    }
+
+                    this.addSprite(color.id, screenCoord, blockSize, this.bgLayer);
+                }
             }
-        }        
+        }
     }
 
     setTextFor(player, screenCoord) {
         let text = this.userIdToText.get(player.userId);
-        if (!text) {            
+        if (!text) {
             text = new Text(player.name, {
                 font: "12px Roboto", // Set  style, size and font
                 fill: '#00ff00', // Set fill color to green
                 align: 'center', // Center align the text, since it's multiline                
             });
-           
+
             this.userIdToText.set(player.userId, text);
-            
+
             this.textLayer.addChild(text);
         }
 
@@ -111,20 +129,21 @@ export default class Grid {
         text.y = screenCoord.y - 35;
     }
 
-    addSprite(name, screenCoord, blockSize) {
+    addSprite(name, screenCoord, blockSize, layer) {
+        layer = layer || this.playerLayer;
+
         const sprite = this.spritePool.get(name);
         sprite.x = screenCoord.x;
         sprite.y = screenCoord.y;
 
-        if ( sprite.scale.x == 1 && sprite.scale.y == 1)
-        {
+        if (sprite.scale.x == 1 && sprite.scale.y == 1) {
             const scale = blockSize / sprite.width;
             sprite.scale.set(scale, scale);
         }
-        
-        this.playerLayer.addChild(sprite);
+
+        layer.addChild(sprite);
     }
-    
+
     isEven = (num) => num % 2 == 0;
 
     calculateBlockSize(screenWidth, screenHeight) {
@@ -133,7 +152,7 @@ export default class Grid {
         return Math.max(
             Math.floor(byWidth),
             Math.floor(byHeight));
-    }    
+    }
 
     playerOccupiesCoord(segment, coord) {
         if (segment.coords.x == coord.x && segment.coords.y == coord.y) return true;
@@ -143,7 +162,7 @@ export default class Grid {
 
     spriteForPlayer(player) {
         return this.spritePool.get();
-    }   
+    }
 
     hideDeadPlayerText(players) {
         players.forEach(p => {
@@ -151,5 +170,22 @@ export default class Grid {
             this.textLayer.removeChild(text);
             text.destroy(true);
         });
+    }
+
+    colorForCoord(coord) {
+        let r = coord.x  * coord.x;
+        let g = coord.x + coord.y * coord.y;
+        let b = coord.x * coord.x + coord.y;
+
+        const max = Math.max(r, g, b);
+        const scale = 75 / max;
+        r = Math.floor(r * scale);
+        g = Math.floor(g * scale);
+        b = Math.floor(b * scale);
+
+        let val = (r << 16) + (g << 8) + b;
+        val = val % 32;
+
+        return { val, id: `${val}` };
     }
 }

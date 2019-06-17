@@ -10,8 +10,7 @@ export default class SpritePool {
 
     get(id) {
         if (this.unusedSprites[id] == null) {
-            this.unusedSprites[id] = [];
-            this.usedSprites[id] = [];
+            this.touchId(id);
             return this.newSprite(id);
         }
 
@@ -31,6 +30,17 @@ export default class SpritePool {
         return spr;
     }
 
+    add(id, sprite) {
+        if (!this.unusedSprites[id]) {
+            this.touchId(id);
+        }
+        this.unusedSprites[id].push(sprite);
+    }
+
+    has = (id) => {
+        return this.unusedSprites[id] != null && this.unusedSprites[id].length > 0;
+    }
+
     returnAll () {
         for (const id in this.usedSprites) {
             while (this.usedSprites[id].length > 0) {
@@ -39,5 +49,10 @@ export default class SpritePool {
                 this.unusedSprites[id].push(sprite);
             }
         }        
+    }
+
+    touchId(id) {
+        this.unusedSprites[id] = [];
+        this.usedSprites[id] = [];
     }
 }

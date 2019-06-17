@@ -1,4 +1,4 @@
-import { Application, Loader, Sprite, TilingSprite } from 'pixi.js';
+import { Loader, Sprite } from 'pixi.js';
 
 const loader = Loader.shared;
 

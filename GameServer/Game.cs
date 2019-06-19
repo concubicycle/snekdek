@@ -17,6 +17,7 @@ namespace snekdek.GameServer
 
         public TimeSpan _foodSpawnInterval = TimeSpan.FromSeconds(4);
         private Timer _foodTimer;
+        private bool _shouldSpawnFood = true; // optimization to prevent locking state twice. 
 
         private IHubContext<SnekdekHub> _hub;
 
@@ -34,7 +35,11 @@ namespace snekdek.GameServer
         public void Start()
         {
             _tickTimer = new Timer(Tick, null, _timeSpan, _timeSpan);
-            _foodTimer = new Timer(SpawnFood, null, TimeSpan.FromSeconds(3), _foodSpawnInterval);
+            _foodTimer = new Timer(
+                obj => _shouldSpawnFood = true,
+                null,
+                TimeSpan.FromSeconds(3),
+                _foodSpawnInterval);
         }
 
         public User AddUser(UserJoin userJoin)
@@ -65,23 +70,24 @@ namespace snekdek.GameServer
 
         private async void Tick(object stateObj)
         {
-            AdvanceUsers();
-            string json;
             lock (_stateLock)
             {
-                json = _parser.Serialize(_state);
+                if (_shouldSpawnFood)
+                {
+                    SpawnFood();
+                    _shouldSpawnFood = false;
+                }
+
+                AdvanceUsers();
             }
-            await _hub.Clients.All.SendAsync(MessageKey.Tick, json);
+            
+            await _hub.Clients.All.SendAsync(MessageKey.Tick, _state);
         }
 
-        private void SpawnFood(object stateObj)
+        private void SpawnFood()
         {
-            lock (_stateLock)
-            {
-                if (_state.AllFood.Count >= MaxFood) return;
-            }
+            if (_state.AllFood.Count >= MaxFood) return;
 
-            
             var occupiedCoords = FindAllOccupiedCoords();
             var boundingRect = new Rect(occupiedCoords);
 
@@ -92,17 +98,15 @@ namespace snekdek.GameServer
                 boundingRect.ExpandY(200);
 
             var foodCount = 10;
-            lock (_stateLock)
+        
+            while (foodCount-- > 0)
             {
-                while (foodCount-- > 0)
-                {
-                    var foodCoord = boundingRect.RandomInnerPoint();
+                var foodCoord = boundingRect.RandomInnerPoint();
 
-                    if (_state.GameBounds.Contains(foodCoord))
-                    {
-                        var food = new Food { Coords = foodCoord };
-                        _state.AllFood.Add(food);
-                    }
+                if (_state.GameBounds.Contains(foodCoord))
+                {
+                    var food = new Food { Coords = foodCoord };
+                    _state.AllFood.Add(food);
                 }
             }
         }
@@ -128,37 +132,34 @@ namespace snekdek.GameServer
         }
 
 
-
+        // careful, make sure _state is locked by caller.
         private void AdvanceUsers()
         {
-            lock (_stateLock)
+            foreach (var user in _state.Users)
             {
-                foreach (var user in _state.Users)
+                user.Direction = user.PendingDirection;
+
+                user.Advance();
+
+                // This is O(N^bad). needs optimization
+                foreach (var otherUser in _state.Users)
                 {
-                    user.Direction = user.PendingDirection;
-
-                    user.Advance();                    
-
-                    // This is O(N^bad). needs optimization
-                    foreach (var otherUser in _state.Users)
-                    {
-                        if (otherUser == user && user.HeadIntersectsNonHead(otherUser)) 
-                            user.State = UserState.Dead;                        
-                        else if (otherUser != user && user.HeadIntersects(otherUser))
-                            user.State = UserState.Dead;
-                    }
-
-                    var matchedFood = _state.AllFood.FirstOrDefault(f => user.HeadIntersects(f.Coords));
-                    if(matchedFood != null)
-                    {
-                        user.AddSegment();
-                        _state.AllFood.Remove(matchedFood);
-                    }
-
-                    var outOfBounds = !_state.GameBounds.Contains(user.Head.Coords);
-                    if (outOfBounds) 
+                    if (otherUser == user && user.HeadIntersectsNonHead(otherUser))
+                        user.State = UserState.Dead;
+                    else if (otherUser != user && user.HeadIntersects(otherUser))
                         user.State = UserState.Dead;
                 }
+
+                var matchedFood = _state.AllFood.FirstOrDefault(f => user.HeadIntersects(f.Coords));
+                if (matchedFood != null)
+                {
+                    user.AddSegment();
+                    _state.AllFood.Remove(matchedFood);
+                }
+
+                var outOfBounds = !_state.GameBounds.Contains(user.Head.Coords);
+                if (outOfBounds)
+                    user.State = UserState.Dead;
             }
         }
     }

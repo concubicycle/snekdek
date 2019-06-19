@@ -13,31 +13,20 @@ namespace snekdek.GameServer
         private static readonly ConcurrentDictionary<string, User> ClientToUser =
             new ConcurrentDictionary<string, User>();
 
-        private readonly Game _game;
-        private readonly JsonParser _parser;
+        private readonly Game _game;        
 
-        public SnekdekHub(Game game, JsonParser parser)
+        public SnekdekHub(Game game)
         {
             _game = game;
-            _parser = parser;
         }
 
-        public async Task UserJoinMessage(string userJoinJson)
+        public async Task UserJoinMessage(UserJoin userJoin)
         {
-            var settings = new JsonSerializerSettings()
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
-            var userJoin = JsonConvert.DeserializeObject<UserJoin>(userJoinJson, settings);
-
             var user = _game.AddUser(userJoin);
             
-            ClientToUser[Context.ConnectionId] = user;
+            ClientToUser[Context.ConnectionId] = user;            
 
-            var userJson = _parser.Serialize(user);
-
-            await Clients.All.SendAsync(MessageKey.UserJoin, userJson);
+            await Clients.All.SendAsync(MessageKey.UserJoin, user);
         }
 
         public void PlayerInputMessage(int dir)

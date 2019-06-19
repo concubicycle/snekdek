@@ -8,17 +8,17 @@ export default class CoordPlayerLookup {
         });
 
         allFood.forEach(food => {
-            var id = this.coord_id(food.coords);
+            var id = this.coord_id(food.c);
             this.coordToFood.set(id, food);
         });
     }
 
     recureseSegments(player, segment, map) {
-        const id = this.coord_id(segment.coords);
+        const id = this.coord_id(segment.c);
         map.set(id, player);        
 
-        if (segment.next != null)
-            this.recureseSegments(player, segment.next, map);
+        if (segment.n != null)
+            this.recureseSegments(player, segment.n, map);
     }
 
     playerForCoords(coords) {

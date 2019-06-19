@@ -1,32 +1,41 @@
-import {HubConnectionBuilder} from '@aspnet/signalr';
-
 import '../css/style.css';
 import GameLoop from '../game/GameLoop';
 import loadImages from '../utils/loadImages';
 
 import GameSound from './GameSound'
 
-const runGame = (name) => {
-    loadImages([
+
+const runGame = (name) => {   
+    const loadImagesPromise = loadImages([
         'block.png',
         'square.png',
         'food.png',
         'wall.png'
-    ]).then(sprites => onResourcesReady(sprites, name))
+    ]);
+
+    const signalRPromise = import(/* webpackChunkName: "signalr" */ '@aspnet/signalr');
+    const msgPackPromise = import(/* webpackChunkName: "signalr-protocol-msgpack" */ '@aspnet/signalr-protocol-msgpack');
+
+    Promise.all([loadImagesPromise, signalRPromise, msgPackPromise])
+        .then(([sprites, HubConnectionBuilder, MessagePackHubProtocol]) =>
+        {
+            onSignarReady(sprites, name, HubConnectionBuilder, MessagePackHubProtocol);
+        });
 }
 
-function onResourcesReady(sprites, name) {
+function onSignarReady(sprites, name, signalR, msgProtocol) {
     const userId = guid();
     const userJoin = { name, userId };
     let state = {};
 
-    hideFooter() 
+    hideFooter()
 
-    let connection = new HubConnectionBuilder()
-    .withUrl('/snekdekHub')
-    .build();
-    
-    function onPlayerDied() {        
+    let connection = new signalR.HubConnectionBuilder()
+        .withUrl('/snekdekHub')
+        .withHubProtocol(new msgProtocol.MessagePackHubProtocol())
+        .build();
+
+    function onPlayerDied() {
         window.onbeforeunload = null;
         document.removeEventListener('keydown', press);
         connection.stop();
@@ -48,9 +57,7 @@ function onResourcesReady(sprites, name) {
     const game = new GameLoop(sprites, onPlayerDied);
 
 
-    connection.on("tick", data => {        
-        state = JSON.parse(data);
-
+    connection.on("tick", state => {
         populateUsersList(state.users);
 
         var localUser = state.users.find(u => u.userId == userId);
@@ -64,9 +71,7 @@ function onResourcesReady(sprites, name) {
         GameSound.tick.play();
     });
 
-    connection.on("userjoin", userJson => {
-        const user = JSON.parse(userJson);
-
+    connection.on("userjoin", user => {
         if (user.userId != userId) {
             state.users.push(user)
             game.refresh(state);
@@ -74,10 +79,10 @@ function onResourcesReady(sprites, name) {
     });
 
     connection.start().then(() => {
-        connection.invoke("UserJoinMessage", JSON.stringify(userJoin)).catch(function (err) {
+        connection.invoke("UserJoinMessage", userJoin).catch(function (err) {
             return console.error(err.toString());
         });
-    });       
+    });
 
     function press(e) {
         if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */ || e.keyCode === 90 /* z */) {
@@ -121,7 +126,7 @@ function populateUsersList(users) {
         li.innerText = `${u.name} (${u.score})`;
         return li;
     })
-    
+
     while (list.firstChild) {
         list.removeChild(list.firstChild);
     }

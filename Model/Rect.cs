@@ -1,30 +1,41 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MessagePack;
 using snekdek.Model;
 
-namespace snekdek.GameServer
+namespace snekdek.Model
 {
+    [MessagePackObject]
     public class Rect
     {
+        [Key("minX")]
         public int MinX { get; private set; }
-        public int MinY { get; private set;}
-        public int MaxX { get; private set;}
+
+        [Key("minY")]
+        public int MinY { get; private set; }
+
+        [Key("maxX")]
+        public int MaxX { get; private set; }
+
+        [Key("maxY")]
         public int MaxY { get; private set; }
 
+        [Key("spanX")]
         public int SpanX => MaxX - MinX;
+
+        [Key("spanY")]
         public int SpanY => MaxY - MinY;
 
         public Rect(IEnumerable<Coord> coords)
-        {   
-            if(coords == null || coords.Count() == 0) return;
+        {
+            if (coords == null || coords.Count() == 0) return;
 
             var first = coords.First();
             MinX = MaxX = first.X;
             MinY = MaxY = first.Y;
 
-            foreach(var c in coords)
+            foreach (var c in coords)
             {
                 if (c.X < MinX)
                     MinX = c.X;
@@ -43,6 +54,18 @@ namespace snekdek.GameServer
             MaxX = upperRight.X;
             MinY = upperRight.Y;
             MaxY = lowerLeft.Y;
+        }
+
+        public Rect(
+            int minX,
+            int minY,
+            int maxX,
+            int maxY)
+        {
+            MinX = minX;
+            MinY = minY;
+            MaxX = maxX;
+            MaxY = maxY;
         }
 
         public Coord RandomInnerPoint()
@@ -67,7 +90,7 @@ namespace snekdek.GameServer
 
         public bool Contains(Coord coord)
         {
-            return coord.X > MinX &&  coord.Y > MinY && coord.X < MaxX && coord.Y < MaxY;
+            return coord.X > MinX && coord.Y > MinY && coord.X < MaxX && coord.Y < MaxY;
         }
     }
 }

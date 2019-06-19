@@ -1,14 +1,19 @@
 using System;
+using MessagePack;
 
 namespace snekdek.Model
 {
+    [MessagePackObject]
     public class Coord : IEquatable<Coord>
     {
+        [Key("x")]
         public int X { get; set; }
+
+        [Key("y")]
         public int Y { get; set; }
 
-        public Coord() {}
-        public Coord(int x, int y) 
+        public Coord() { }
+        public Coord(int x, int y)
         {
             X = x;
             Y = y;

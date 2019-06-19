@@ -21,8 +21,6 @@ export default class Grid {
         this.app.stage.addChild(this.bgLayer);
         this.app.stage.addChild(this.playerLayer);
         this.app.stage.addChild(this.textLayer);
-
-
     }
 
     userIdToText = new Map();
@@ -39,7 +37,7 @@ export default class Grid {
 
         this.spritePool.returnAll();
 
-        const centerCoord = localPlayer.head.coords;
+        const centerCoord = localPlayer.head.c;
 
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
@@ -88,7 +86,7 @@ export default class Grid {
 
                 if (outOfBounds) this.addSprite('wall', screenCoord, blockSize);
                 if (playerOnTile) {
-                    if (playerOnTile.head.coords.x == x && playerOnTile.head.coords.y == y)
+                    if (playerOnTile.head.c.x == x && playerOnTile.head.c.y == y)
                         this.setTextFor(playerOnTile, screenCoord);
 
                     this.addSprite('block', screenCoord, blockSize);
@@ -156,7 +154,7 @@ export default class Grid {
 
     playerOccupiesCoord(segment, coord) {
         if (segment.coords.x == coord.x && segment.coords.y == coord.y) return true;
-        if (segment.next != null) return this.playerOccupiesCoord(segment.next, coord);
+        if (segment.n != null) return this.playerOccupiesCoord(segment.n, coord);
         return false;
     }
 

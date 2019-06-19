@@ -1,83 +1,66 @@
+using MessagePack;
 using Newtonsoft.Json;
 
 namespace snekdek.Model
 {
+
+    // NOTE: There are a lot of segments in the game, so the names are minified. 
+    [MessagePackObject]
     public class Segment
     {
         private static int NextSegmentId = 1;
 
-        public int SegmentId { get; set; }
-
-        private bool NewlyAdded { get; set; } = true;
-
-        public Segment Next { get; set; }
-
-        [JsonIgnore]
-        public Segment Previous { get; set; }
-
-
         public Segment(Segment previous)
         {
-            SegmentId = NextSegmentId++;
             Previous = previous;
         }
 
-        public Segment()
-        {
-            SegmentId = NextSegmentId++;
-        }
+        public Segment() {}
 
+        [Key("n")]
+        public Segment Next { get; set; }
 
+        [JsonIgnore]
+        [IgnoreMember]        
+        public Segment Previous { get; set; }
+
+        [Key("c")]
         public Coord Coords { get; set; } = new Coord();
 
+        [Key("i")]
         public bool IsHead => Previous == null;
 
 
         public Segment AddNewSegment()
         {
-            if (Next != null)
-            {
-                return Next.AddNewSegment();
-            }
-            else
-            {
-                Next = new Segment(this);
-                Next.Coords.X = Coords.X;
-                Next.Coords.Y = Coords.Y;
+            var cursor = this;
 
-                return Next;
-            }
+            while (cursor.Next != null)
+                cursor = cursor.Next;
+            
+            cursor.Next = new Segment(cursor);
+            cursor.Next.Coords.X = cursor.Coords.X;
+            cursor.Next.Coords.Y = cursor.Coords.Y;
+
+            return cursor.Next;
         }
 
         public void Advance(Direction dir)
         {
-            if (Next != null)
-            {
-                Next.Advance(dir);
-            }
+            var cursor = this;
 
-            if (IsHead)
+            while (cursor.Next != null)
+                cursor = cursor.Next;
+            
+            do
             {
-                switch (dir)
-                {
-                    case Direction.Up:
-                        Coords.Y--;
-                        break;
-                    case Direction.Right:
-                        Coords.X++;
-                        break;
-                    case Direction.Down:
-                        Coords.Y++;
-                        break;
-                    case Direction.Left:
-                        Coords.X--;
-                        break;
-                }
-            }
-            else
-            {
-                Coords.SetFrom(Previous.Coords);
-            }
+                if (cursor.IsHead)
+                    cursor.Coords.AdvanceInDir(dir);
+                else
+                    cursor.Coords.SetFrom(cursor.Previous.Coords);
+
+                cursor = cursor.Previous;
+            } while (cursor != null);
         }
     }
 }

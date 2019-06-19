@@ -5,12 +5,8 @@ var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OutputDir = path.resolve(__dirname, 'wwwroot');
 const IndexTemplate = path.resolve(__dirname, 'src/index.template.html');
 
-const Mode = 'development'
-
-module.exports = {
-  mode: Mode,
+module.exports = {  
   entry: './src/index.js',
-  devtool: 'eval-source-map',
   output: {
     filename: 'bundle.js',
     path: OutputDir,  
@@ -24,7 +20,7 @@ module.exports = {
           {
             loader: MiniCssExtractPlugin.loader,
             options: {
-              hmr: process.env.NODE_ENV === Mode,
+              hmr: process.env.NODE_ENV === "development",
             },
           },
           'css-loader',
@@ -43,7 +39,7 @@ module.exports = {
       }
     ]
   },
-  plugins: [
+  plugins: [    
     new HtmlWebpackPlugin({
       template: IndexTemplate
     }),

@@ -1,17 +1,30 @@
-using System.Collections.Generic;
+using System.Runtime.Serialization;
+using MessagePack;
 
 namespace snekdek.Model
 {
+    [MessagePackObject]
     public class User
     {
-        public string UserId { get; set; }
-
-        public string Name { get; set; }
-        public Segment Head { get; set; } = new Segment();
-        public UserState State { get; set; } = UserState.Active;
-        public Direction Direction { get; set; }
-        public Direction PendingDirection { get; set; }
-
+        [Key("userId")]
+        public string UserId { get; set; }        
+        
+        [Key("name")]
+        public string Name { get; set; }        
+        
+        [Key("head")]
+        public Segment Head { get; set; } = new Segment();        
+        
+        [Key("state")]
+        public UserState State { get; set; } = UserState.Active;        
+        
+        [Key("direction")]
+        public Direction Direction { get; set; }        
+        
+        [Key("pendingDirection")]
+        public Direction PendingDirection { get; set; }        
+        
+        [Key("score")]
         public int Score { get; set; }
 
 

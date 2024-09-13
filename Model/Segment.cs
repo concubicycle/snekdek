@@ -8,8 +8,6 @@ namespace snekdek.Model
     [MessagePackObject]
     public class Segment
     {
-        private static int NextSegmentId = 1;
-
         public Segment(Segment previous)
         {
             Previous = previous;

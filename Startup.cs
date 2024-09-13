@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using snekdek.GameServer;
 using snekdek.Utils;
 
@@ -29,7 +30,7 @@ namespace snekdek
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             app.UseFileServer();
 
@@ -38,13 +39,10 @@ namespace snekdek
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseSignalR(routes =>
-           {
-               routes.MapHub<SnekdekHub>("/snekdekHub");
-           });
-
-            // var serviceProvider = app.ApplicationServices;
-            // Hub = serviceProvider.GetService<IHubContext<SnekdekHub>>();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<SnekdekHub>("/snekdekHub");
+            });
         }
     }
 }

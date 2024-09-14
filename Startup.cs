@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using snekdek.GameServer;
@@ -16,15 +14,14 @@ namespace snekdek
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR()
-                .AddMessagePackProtocol(options =>
+            services.AddSignalR().AddMessagePackProtocol(options =>
                 {
                     options.FormatterResolvers = new List<MessagePack.IFormatterResolver>()
                     {
                         MessagePack.Resolvers.ContractlessStandardResolver.Instance,
                     };
                 });
-
+                
             services.AddSingleton<Game, Game>();
             services.AddSingleton<JsonParser, JsonParser>();
         }
@@ -33,6 +30,7 @@ namespace snekdek
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             app.UseFileServer();
+            app.UseRouting();
 
             if (env.IsDevelopment())
             {

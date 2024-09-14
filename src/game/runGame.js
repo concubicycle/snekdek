@@ -1,8 +1,9 @@
 import '../css/style.css';
-import GameLoop from '../game/GameLoop';
+import GameLoop from '../game/gameloop';
 import loadImages from '../utils/loadImages';
 
-import GameSound from './GameSound'
+import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
+
 
 
 const runGame = (name) => {   
@@ -13,17 +14,16 @@ const runGame = (name) => {
         'wall.png'
     ]);
 
-    const signalRPromise = import(/* webpackChunkName: "signalr" */ '@aspnet/signalr');
-    const msgPackPromise = import(/* webpackChunkName: "signalr-protocol-msgpack" */ '@aspnet/signalr-protocol-msgpack');
+    const signalRPromise = import(/* webpackChunkName: "signalr" */ '@microsoft/signalr');    
 
-    Promise.all([loadImagesPromise, signalRPromise, msgPackPromise])
+    Promise.all([loadImagesPromise, signalRPromise])
         .then(([sprites, HubConnectionBuilder, MessagePackHubProtocol]) =>
         {
             onSignarReady(sprites, name, HubConnectionBuilder, MessagePackHubProtocol);
         });
 }
 
-function onSignarReady(sprites, name, signalR, msgProtocol) {
+function onSignarReady(sprites, name, signalR) {
     const userId = guid();
     const userJoin = { name, userId };
     let state = {};
@@ -32,14 +32,13 @@ function onSignarReady(sprites, name, signalR, msgProtocol) {
 
     let connection = new signalR.HubConnectionBuilder()
         .withUrl('/snekdekHub')
-        .withHubProtocol(new msgProtocol.MessagePackHubProtocol())
+        .withHubProtocol(new MessagePackHubProtocol())
         .build();
 
     function onPlayerDied() {
         window.onbeforeunload = null;
         document.removeEventListener('keydown', press);
-        connection.stop();
-        GameSound.one.stop();
+        connection.stop();        
 
         const game = document.getElementById('game');
         game.classList.add('hidden');
@@ -51,11 +50,8 @@ function onSignarReady(sprites, name, signalR, msgProtocol) {
 
     const gameEl = document.getElementById('game');
     gameEl.classList.remove('hidden');
-
-    GameSound.one.loop = true;
-    GameSound.one.play();
+    
     const game = new GameLoop(sprites, onPlayerDied);
-
 
     connection.on("tick", state => {
         populateUsersList(state.users);
@@ -67,8 +63,6 @@ function onSignarReady(sprites, name, signalR, msgProtocol) {
         }
 
         game.refresh(state, localUser);
-
-        GameSound.tick.play();
     });
 
     connection.on("userjoin", user => {

@@ -1,6 +1,4 @@
-import { Loader, Sprite } from 'pixi.js';
-
-const loader = Loader.shared;
+import { Assets, Sprite } from 'pixi.js';
 
 // only load once, cache the output of this module
 let spriteFactoryFunc = null;
@@ -15,20 +13,17 @@ const loadImages = (paths) => new Promise((resolve, reject) => {
     for(const p of paths) {
         const id = pathToId(p);
         ids.push(id);
-        loader.add(id, p);
-        console.log(`adding ${p} as ${id}`)
+        Assets.add({alias: id, src: p});
     }
 
-    loader.onError.add(() => console.log('problem loading images'));    
-
-    loader.load((loader, resources) => {
-        const spriteCreators = ids.map(id => ({[id]: () => new Sprite(resources[id].texture) }));
+    Assets.load(ids).then(textures => {
+        const spriteCreators = ids.map(id => ({[id]: () => Sprite.from(textures[id]) }));
         const spriteFactory = Object.assign({}, ...spriteCreators)
 
         spriteFactoryFunc = id => spriteFactory[id]();
         resolve(spriteFactoryFunc);
     })
-});
+})
 
 // by default, the file name without extension is used as id
 function pathToId (fullPath) {

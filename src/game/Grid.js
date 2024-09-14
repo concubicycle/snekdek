@@ -164,6 +164,8 @@ export default class Grid {
 
     hideDeadPlayerText(players) {
         players.forEach(p => {
+            if (!this.userIdToText.has(p.userId)) return
+            
             const text = this.userIdToText.get(p.userId);
             this.textLayer.removeChild(text);
             text.destroy(true);

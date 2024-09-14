@@ -1,29 +1,33 @@
 import Grid from './Grid';
-import Window from './Window';
-import GameSound from './GameSound'
+
+
 
 import { Application } from 'pixi.js';
 
 export default class GameLoop {
     constructor(sprites, onPlayerDied) {
-        this.app = new Application({
-            autoResize: true,
-        });
-
+        this.sprites = sprites;
         this.onPlayerDied = onPlayerDied;
 
-        this.sprites = sprites;
+        this.app = new Application()
+        this.app.init({ autoResize: true }).then(() => {
+            this.app.canvas.style.position = "absolute"
+            this.app.canvas.style.display = "block"
+            this.app.renderer.autoResize = true
+            this.app.renderer.resize(window.innerWidth, window.innerHeight)
 
-        this.grid = new Grid(this.app, sprites);
-        this.window = new Window(this.app);
+            const gameEl = document.getElementById('game')
+            gameEl.appendChild(this.app.canvas)
+
+            this.grid = new Grid(this.app, sprites)
+        })
     }
 
     lastLocalUser = null;
     active = true;
-
+    
     refresh(state, localUser) {
-        if (this.hasPlayerDied(localUser)) {            
-            //this.teardown();
+        if (this.hasPlayerDied(localUser)) {
             if (this.onPlayerDied) this.onPlayerDied();
         }
         else if (this.active)
@@ -31,8 +35,7 @@ export default class GameLoop {
             this.grid.redraw(state, localUser);
         }
 
-        if (this.hasPlayerGrown(localUser)) {
-            GameSound.score.play();
+        if (this.hasPlayerGrown(localUser)) {            
         }
 
         this.lastLocalUser = localUser;

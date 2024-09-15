@@ -63,6 +63,21 @@ export default class Grid {
         const minY = centerCoord.y - (halfYSpan);
         const maxY = centerCoord.y + (halfYSpan);
 
+        try
+        {
+            this.drawTiles(
+                minX, maxX, 
+                minY, maxY,
+                coordPlayerLookup, 
+                state, 
+                blockSize);
+        }
+        catch (e) {
+            console.log(e)
+        }
+    }
+
+    drawTiles(minX, maxX, minY, maxY, coordPlayerLookup, state, blockSize) {
         function worldToScreenCoord(coord) {
             const x = (coord.x - minX) * blockSize;
             const y = (coord.y - minY) * blockSize;
@@ -76,10 +91,9 @@ export default class Grid {
 
                 const coords = { x, y };
                 const playerOnTile = coordPlayerLookup.playerForCoords(coords);
-                const foodOnTile = coordPlayerLookup.foodForCoords(coords)
+                const foodOnTile = coordPlayerLookup.foodForCoords(coords);
 
-                const outOfBounds =
-                    x <= state.gameBounds.minX
+                const outOfBounds = x <= state.gameBounds.minX
                     || x >= state.gameBounds.maxX
                     || y <= state.gameBounds.minY
                     || y >= state.gameBounds.maxY;
@@ -173,9 +187,9 @@ export default class Grid {
     }
 
     colorForCoord(coord) {
-        let r = coord.x  * coord.x;
-        let g = coord.x + coord.y * coord.y;
-        let b = coord.x * coord.x + coord.y;
+        let r = coord.x  * coord.x; + 1
+        let g = coord.x + coord.y * coord.y + 1;
+        let b = coord.x * coord.x + coord.y + 1;
 
         const max = Math.max(r, g, b);
         const scale = 75 / max;
